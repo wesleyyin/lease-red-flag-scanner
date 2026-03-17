@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LeaseGuard - Red Flag Scanner</title>
+<meta name="description" content="Scan your lease agreement for hidden fees, penalty clauses, liability traps, and missing protections. Get plain-English explanations of what each clause means for you.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<!-- Print-only header -->
+<div class="print-header">
+  <h1>LeaseGuard Report</h1>
+  <p>Lease Red Flag Analysis</p>
+</div>
+
+<!-- App Header -->
+<header class="app-header">
+  <div class="header-inner">
+    <div class="logo-row" onclick="showView('scanner')">
+      <div class="logo-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f0e0d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <span class="logo-text">LeaseGuard</span>
+    </div>
+    <nav class="nav-links">
+      <button class="nav-btn active" data-view="scanner" onclick="showView('scanner')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        Scanner
+      </button>
+      <button class="nav-btn" data-view="history" onclick="showView('history')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        History
+        <span class="nav-badge" id="history-badge">0</span>
+      </button>
+    </nav>
+  </div>
+</header>
+
+<div class="wrapper">
+
+  <!-- ============================================================ -->
+  <!-- VIEW: SCANNER -->
+  <!-- ============================================================ -->
+  <div id="view-scanner" class="view active">
+
+    <div id="input-section">
+      <div class="hero">
+        <h1>Scan your lease for red flags</h1>
+        <p>Paste your lease agreement below. LeaseGuard checks for hidden fees, penalty clauses, liability traps, and missing protections -- then explains what each one means for you in plain English.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <div class="label-row">
+            <label for="lease-input">Lease Agreement Text</label>
+            <span class="char-count" id="char-count"></span>
+          </div>
+          <textarea id="lease-input" placeholder="Paste your full lease text here. The more complete the lease, the better the scan..."></textarea>
+          <div class="btn-row">
+            <button class="btn btn-primary" id="scan-btn" onclick="scanLease()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              Scan Lease
+              <span class="btn-shortcut">Cmd+Enter</span>
+            </button>
+            <button class="btn btn-ghost" onclick="loadSample()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              Load Sample Lease
+            </button>
+            <button class="btn btn-ghost" onclick="clearAll()">
+              Clear
+            </button>
+          </div>
+        </div>
+        <div class="scanning-overlay" id="scanning">
+          <div class="scanner-bar"><div class="scanner-bar-fill"></div></div>
+          <p class="scanning-text">Analyzing lease clauses...</p>
+          <p class="scanning-sub">Checking 45 rules across 6 categories</p>
+        </div>
+      </div>
+    </div>
+
+    <div id="results"></div>
+
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- VIEW: HISTORY -->
+  <!-- ============================================================ -->
+  <div id="view-history" class="view">
+    <div class="view-header">
+      <h2>Scan History</h2>
+      <p>Your saved lease scans. Select two to compare side-by-side.</p>
+    </div>
+    <div id="history-content"></div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- VIEW: COMPARISON -->
+  <!-- ============================================================ -->
+  <div id="view-compare" class="view">
+    <div class="view-header">
+      <h2>Lease Comparison</h2>
+      <p>Side-by-side analysis of two lease agreements.</p>
+    </div>
+    <div id="comparison-content"></div>
+    <div style="text-align:center;padding:20px 0 60px;">
+      <button class="btn btn-ghost" onclick="showView('history')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        Back to History
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<!-- Save Modal -->
+<div class="modal-backdrop" id="save-modal">
+  <div class="modal-box">
+    <h3 class="modal-title">Save Scan</h3>
+    <p class="modal-subtitle">Give this scan a name so you can find it later.</p>
+    <input type="text" class="modal-input" id="save-name-input" placeholder='e.g., "123 Main St Apartment"' maxlength="100">
+    <div class="modal-actions">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('save-modal')">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="confirmSaveScan()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Scripts (order matters) -->
+<script src="js/rules.js"></script>
+<script src="js/scanner.js"></script>
+<script src="js/history.js"></script>
+<script src="js/comparison.js"></script>
+<script src="js/sample.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>
